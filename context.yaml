@@ -1,0 +1,30 @@
+skip_files: [
+  ".git",
+  ".github",
+  ".idea",
+  ".pytest_cache",
+  ".venv",
+  "__pycache__",
+  "__init__.py",
+  ".DS_Store",
+  "*.pyc",
+  "*.log",
+  "*.lock",
+  "*.xml",
+  ".dockerignore",
+  ".gitignore",
+  ".env.local",
+]
+
+database:
+  enabled: false
+  url: sqlite:////Users/abbos/Downloads/chinook.db
+  skip_tables: [ ]
+
+file_tree:
+  enabled: true
+  root: /Users/abbos/PycharmProjects/context-aggregator
+
+paths: [
+  /Users/abbos/PycharmProjects/context-aggregator,
+]
