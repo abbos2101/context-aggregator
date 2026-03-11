@@ -50,4 +50,5 @@ def get_file_tree(root: Path, skip_patterns: list[str]) -> str:
     ]
 
     lines.append(f"\n{len(dirs)} directories, {len(files)} files")
-    return "\n".join(lines)
+    content = "\n".join(lines)
+    return f"<file_tree>\n{content}\n</file_tree>"
