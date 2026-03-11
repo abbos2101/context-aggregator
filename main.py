@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI
@@ -10,12 +11,58 @@ from app.database import get_db_context
 from app.file_tree import get_file_tree
 from app.paths import get_paths_context
 
+EXAMPLE_CONFIG = """\
+skip_files: [
+  ".git",
+  ".github",
+  ".idea",
+  ".pytest_cache",
+  ".venv",
+  "__pycache__",
+  "__init__.py",
+  "build",
+  "dist",
+  ".DS_Store",
+  "*.pyc",
+  "*.spec",
+  "*.log",
+  "*.lock",
+  "*.xml",
+  ".dockerignore",
+  ".gitignore",
+  ".env.local",
+]
+
+database:
+  enabled: false
+  url: sqlite:////Users/yourname/Downloads/my-database.db
+  skip_tables: []
+
+file_tree:
+  enabled: true
+  root: /Users/yourname/PycharmProjects/my-project
+
+paths:
+  - /Users/yourname/PycharmProjects/my-project
+"""
+
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["GET"],
 )
+
+
+@app.on_event("startup")
+async def ensure_config():
+    config_path = Path("context.yaml")
+    if not config_path.exists():
+        config_path.write_text(EXAMPLE_CONFIG)
+        print(
+            "context.yaml not found — example config created. Please edit it and restart."
+        )
+
 
 @app.get("/")
 async def health():
@@ -47,7 +94,6 @@ async def get_files():
     config = load_config()
     if not config.file_tree.enabled:
         return "file_tree disabled"
-
     return get_file_tree(config.file_tree.root, config.skip_files)
 
 

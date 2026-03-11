@@ -6,8 +6,11 @@ skip_files: [
   ".venv",
   "__pycache__",
   "__init__.py",
+  "build",
+  "dist",
   ".DS_Store",
   "*.pyc",
+  "*.spec",
   "*.log",
   "*.lock",
   "*.xml",
@@ -17,14 +20,14 @@ skip_files: [
 ]
 
 database:
-  enabled: false
-  url: sqlite:////Users/abbos/Downloads/chinook.db
+  enabled: true
+  url: postgresql://lochin:lochin@localhost:5432/lochin
   skip_tables: [ ]
 
 file_tree:
-  enabled: true
+  enabled: false
   root: /Users/abbos/PycharmProjects/context-aggregator
 
 paths: [
-  /Users/abbos/PycharmProjects/context-aggregator,
+  #/Users/abbos/PycharmProjects/context-aggregator,
 ]
