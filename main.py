@@ -1,9 +1,11 @@
+import subprocess
 import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
 
@@ -131,6 +133,18 @@ async def get_db():
     if not config.database.enabled:
         return "database disabled"
     return get_db_context(config.database.url, config.database.skip_tables)
+
+
+@app.get("/context/open")
+async def context_open():
+    config_path = get_config_path().resolve()
+    if not config_path.exists():
+        raise HTTPException(status_code=404, detail=f"{config_path} topilmadi")
+    try:
+        subprocess.run(["open", str(config_path)], check=True)
+    except subprocess.CalledProcessError as e:
+        raise HTTPException(status_code=500, detail=f"open failed: {e}")
+    return {"opened": str(config_path)}
 
 
 if __name__ == "__main__":
