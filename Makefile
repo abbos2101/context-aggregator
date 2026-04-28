@@ -14,6 +14,9 @@ run-prod:
 	uvicorn main:app --port 2101
 
 build-mac:
-	.venv/bin/pyinstaller --onefile --name context-ai main.py
+	.venv/bin/pyinstaller --onefile --name context-ai \
+		--collect-all tiktoken \
+		--collect-all tiktoken_ext \
+		main.py
 	chmod +x dist/context-ai
 	@echo "Tayyor: dist/context-ai"

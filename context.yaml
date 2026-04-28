@@ -1,6 +1,21 @@
+database:
+  enabled: false
+  url: postgresql://lochin:lochin@127.0.0.1/lochin?statusColor=686B6F&env=local&name=lochin&tLSMode=0&usePrivateKey=false&safeModeLevel=0&advancedSafeModeLevel=0&driverVersion=0&lazyload=false
+  skip_tables: [ ]
+
+file_tree:
+  enabled: false
+  root: /Users/abbos/PycharmProjects/context-aggregator/app
+
+paths: [
+  /Users/abbos/PycharmProjects/context-aggregator/main.py,
+  /Users/abbos/PycharmProjects/context-aggregator/app,
+  /Users/abbos/PycharmProjects/context-aggregator/Makefile,
+  /Users/abbos/PycharmProjects/context-aggregator/pyproject.toml,
+]
+
 skip_files: [
   ".git",
-  ".github",
   ".idea",
   ".pytest_cache",
   ".venv",
@@ -14,20 +29,26 @@ skip_files: [
   "*.log",
   "*.lock",
   "*.xml",
-  ".dockerignore",
-  ".gitignore",
+  "*.db",
   ".env.local",
-]
-
-database:
-  enabled: true
-  url: postgresql://lochin:lochin@localhost:5432/lochin
-  skip_tables: [ ]
-
-file_tree:
-  enabled: false
-  root: /Users/abbos/PycharmProjects/context-aggregator
-
-paths: [
-  #/Users/abbos/PycharmProjects/context-aggregator,
+  '.',
+  '..',
+  '.DS_Store',
+  '.dart_tool',
+  '.env.dev.json',
+  '.env.prod.json',
+  '.flutter-plugins-dependencies',
+  '.metadata',
+  '.vscode',
+  '.run',
+  '*.html',
+  '*.htm',
+  '*.png',
+  '*.jpg',
+  '*.jpeg',
+  '*.gif',
+  '*.freezed.dart',
+  '*.g.dart',
+  '*.config.dart',
+  'firebase_options.dart',
 ]
