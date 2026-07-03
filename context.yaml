@@ -5,13 +5,18 @@ database:
 
 file_tree:
   enabled: false
-  root: /Users/abbos/PycharmProjects/context-aggregator/app
+  root: /Users/abbos/Downloads/my-plugin
 
 paths: [
+  /Users/abbos/Documents/context-ai/ai-rule/agent-mode.md,
+  #  /Users/abbos/Downloads/demo-plugin,
   /Users/abbos/PycharmProjects/context-aggregator/main.py,
-  /Users/abbos/PycharmProjects/context-aggregator/app,
   /Users/abbos/PycharmProjects/context-aggregator/Makefile,
   /Users/abbos/PycharmProjects/context-aggregator/pyproject.toml,
+  /Users/abbos/PycharmProjects/context-aggregator/main.py,
+  /Users/abbos/PycharmProjects/context-aggregator/app,
+
+
 ]
 
 skip_files: [
@@ -28,7 +33,6 @@ skip_files: [
   "*.spec",
   "*.log",
   "*.lock",
-  "*.xml",
   "*.db",
   ".env.local",
   '.',
@@ -41,8 +45,8 @@ skip_files: [
   '.metadata',
   '.vscode',
   '.run',
-  '*.html',
-  '*.htm',
+  # '*.html',
+  # '*.htm',
   '*.png',
   '*.jpg',
   '*.jpeg',

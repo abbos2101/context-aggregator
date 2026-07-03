@@ -9,11 +9,11 @@ from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
 
-from app.config import load_config
-from app.database import get_db_context
-from app.file_tree import get_file_tree
-from app.paths import get_paths_context
-from app.tokens import count_tokens
+from app.common.config import load_config
+from app.sources.database import get_db_context
+from app.sources.file_tree import get_file_tree
+from app.sources.paths import get_paths_context
+from app.common.tokens import count_tokens
 
 EXAMPLE_CONFIG = """\
 skip_files: [

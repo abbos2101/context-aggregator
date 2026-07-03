@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from app.utils import should_skip
+from app.common.utils import should_skip
 
 
 def build_tree(
