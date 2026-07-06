@@ -5,15 +5,16 @@ from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI
-from fastapi import HTTPException
+from fastapi import File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
 
 from app.common.config import load_config
+from app.common.tokens import count_tokens
+from app.sources.clipboard import ClipboardError, copy_to_clipboard
 from app.sources.database import get_db_context
 from app.sources.file_tree import get_file_tree
 from app.sources.paths import get_paths_context
-from app.common.tokens import count_tokens
 
 EXAMPLE_CONFIG = """\
 skip_files: [
@@ -145,6 +146,30 @@ async def context_open():
     except subprocess.CalledProcessError as e:
         raise HTTPException(status_code=500, detail=f"open failed: {e}")
     return {"opened": str(config_path)}
+
+
+@app.post("/context/copy_clipboard")
+async def copy_clipboard(
+    ui_data: str | None = Form(None),
+    ui_image: UploadFile | None = File(None),
+):
+    if ui_data is None and ui_image is None:
+        raise HTTPException(
+            status_code=400, detail="ui_data yoki ui_image talab qilinadi"
+        )
+
+    image_bytes: bytes | None = None
+    image_type: str | None = None
+    if ui_image is not None:
+        image_bytes = await ui_image.read()
+        image_type = ui_image.content_type
+
+    try:
+        copied = copy_to_clipboard(ui_data, image_bytes, image_type)
+    except ClipboardError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return {"copied": copied}
 
 
 if __name__ == "__main__":
