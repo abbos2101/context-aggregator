@@ -12,43 +12,62 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 from app.common.config import load_config
 from app.common.tokens import count_tokens
 from app.sources.clipboard import ClipboardError, copy_to_clipboard
-from app.sources.database import get_db_context
 from app.sources.file_tree import get_file_tree
 from app.sources.paths import get_paths_context
 
 EXAMPLE_CONFIG = """\
-skip_files: [
-  ".git",
-  ".github",
-  ".idea",
-  ".pytest_cache",
-  ".venv",
-  "__pycache__",
-  "__init__.py",
-  "build",
-  "dist",
-  ".DS_Store",
-  "*.pyc",
-  "*.spec",
-  "*.log",
-  "*.lock",
-  "*.xml",
-  ".dockerignore",
-  ".gitignore",
-  ".env.local",
-]
-
-database:
-  enabled: false
-  url: /Users/yourname/Downloads/my-database.db
-  skip_tables: []
-
 file_tree:
   enabled: true
   root: /Users/yourname/PycharmProjects/my-project
 
-paths:[
-/Users/yourname/PycharmProjects/my-project
+paths: [
+  /Users/yourname/PycharmProjects/my-project,
+]
+
+skip_files: [
+  ".",
+  "..",
+  ".android",
+  ".claude",
+  ".DS_Store",
+  ".dart_tool",
+  ".env.dev.json",
+  ".env.local",
+  ".env.prod.json",
+  ".flutter-plugins-dependencies",
+  ".git",
+  ".idea",
+  ".ios",
+  ".metadata",
+  ".pytest_cache",
+  ".run",
+  ".symlinks",
+  ".venv",
+  ".vscode",
+  "*.config.dart",
+  "*.db",
+  "*.env",
+  "*.freezed.dart",
+  "*.g.dart",
+  "*.gif",
+  "*.htm",
+  "*.html",
+  "*.jpeg",
+  "*.jpg",
+  "*.lock",
+  "*.log",
+  "*.png",
+  "*.pyc",
+  "*.spec",
+  "__init__.py",
+  "__pycache__",
+  "build",
+  "fonts",
+  "firebase_options.dart",
+  "gradle",
+  "Pods",
+  "dist",
+  "test",
 ]
 """
 
@@ -89,9 +108,6 @@ async def get_context():
     config = load_config(get_config_path())
     parts: list[str] = []
 
-    if config.database.enabled:
-        parts.append(get_db_context(config.database.url, config.database.skip_tables))
-
     if config.file_tree.enabled:
         parts.append(get_file_tree(config.file_tree.root, config.skip_files))
 
@@ -126,14 +142,6 @@ async def get_paths():
     if not config.paths:
         return "paths not configured"
     return get_paths_context(config.paths, config.skip_files)
-
-
-@app.get("/context/db", response_class=PlainTextResponse)
-async def get_db():
-    config = load_config(get_config_path())
-    if not config.database.enabled:
-        return "database disabled"
-    return get_db_context(config.database.url, config.database.skip_tables)
 
 
 @app.get("/context/open")
