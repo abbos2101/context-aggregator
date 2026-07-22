@@ -12,3 +12,18 @@ def should_skip(path: Path, skip_patterns: list[str]) -> bool:
         elif fnmatch.fnmatch(name, pattern):
             return True
     return False
+
+
+# Takror va ichma-ich (nested) pathlarni olib tashlaydi.
+# Agar path ro'yxatdagi boshqa pathning ichida bo'lsa — tashlab yuboriladi.
+def dedupe_nested(paths: list[Path]) -> list[Path]:
+    unique: list[Path] = []
+    seen: set[Path] = set()
+
+    for path in paths:
+        if path in seen:
+            continue
+        seen.add(path)
+        unique.append(path)
+
+    return [p for p in unique if not any(parent in seen for parent in p.parents)]

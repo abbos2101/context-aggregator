@@ -1,20 +1,23 @@
 from pathlib import Path
 
-from app.common.utils import should_skip
+from app.common.utils import dedupe_nested, should_skip
 
 
-def build_tree(
+# Bitta o'tishda ham tree satrlarini, ham (dirs, files) statistikani qaytaradi —
+# ko'rsatilgan tree va statistika har doim bir-biriga mos bo'lishi uchun.
+def _walk(
     root: Path,
     skip_patterns: list[str],
     prefix: str = "",
-    is_last: bool = True,
-) -> list[str]:
-    lines = []
+) -> tuple[list[str], int, int]:
+    lines: list[str] = []
+    dirs = 0
+    files = 0
 
     try:
         entries = sorted(root.iterdir(), key=lambda p: (p.is_file(), p.name))
-    except PermissionError:
-        return lines
+    except OSError:
+        return lines, dirs, files
 
     entries = [e for e in entries if not should_skip(e, skip_patterns)]
 
@@ -23,32 +26,44 @@ def build_tree(
         connector = "└── " if last else "├── "
         lines.append(f"{prefix}{connector}{entry.name}")
 
-        if entry.is_dir():
-            extension = "    " if last else "│   "
-            lines.extend(build_tree(entry, skip_patterns, prefix + extension, last))
+        if not entry.is_dir():
+            files += 1
+            continue
 
-    return lines
+        dirs += 1
+        # symlink papka ichiga kirilmaydi — rekursiya sikliga tushib qolmaslik uchun
+        if entry.is_symlink():
+            continue
+
+        extension = "    " if last else "│   "
+        sub_lines, sub_dirs, sub_files = _walk(entry, skip_patterns, prefix + extension)
+        lines.extend(sub_lines)
+        dirs += sub_dirs
+        files += sub_files
+
+    return lines, dirs, files
 
 
-def get_file_tree(root: Path, skip_patterns: list[str]) -> str:
-    lines = [str(root)]
-    lines.extend(build_tree(root, skip_patterns))
+def _render_tree(root: Path, skip_patterns: list[str]) -> str:
+    if not root.exists():
+        return f'<file_tree path="{root}" error="not found" />'
 
-    # stats
-    all_entries = list(root.rglob("*"))
-    dirs = [
-        e
-        for e in all_entries
-        if e.is_dir()
-        and not any(should_skip(p, skip_patterns) for p in [e] + list(e.parents))
-    ]
-    files = [
-        e
-        for e in all_entries
-        if e.is_file()
-        and not any(should_skip(p, skip_patterns) for p in [e] + list(e.parents))
-    ]
+    if root.is_file():
+        body = root.name
+        stats = "0 directories, 1 files"
+    else:
+        lines, dirs, files = _walk(root, skip_patterns)
+        body = "\n".join(lines)
+        stats = f"{dirs} directories, {files} files"
 
-    lines.append(f"\n{len(dirs)} directories, {len(files)} files")
-    content = "\n".join(lines)
-    return f"<file_tree>\n{content}\n</file_tree>"
+    content = f"{body}\n\n{stats}" if body else stats
+    return f'<file_tree path="{root}">\n{content}\n</file_tree>'
+
+
+# Ro'yxatdagi har bir path uchun alohida tree bloki.
+# Boshqa pathning ichida joylashgan pathlar o'tkazib yuboriladi.
+def get_file_trees(roots: list[Path], skip_patterns: list[str]) -> str:
+    roots = dedupe_nested(roots)
+    if not roots:
+        return "<file_tree></file_tree>"
+    return "\n\n".join(_render_tree(root, skip_patterns) for root in roots)
