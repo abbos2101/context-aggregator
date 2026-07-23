@@ -8,6 +8,8 @@ from app.common.utils import dedupe_nested, should_skip
 def _walk(
     root: Path,
     skip_patterns: list[str],
+    max_depth: int,
+    depth: int = 1,
     prefix: str = "",
 ) -> tuple[list[str], int, int]:
     lines: list[str] = []
@@ -35,8 +37,14 @@ def _walk(
         if entry.is_symlink():
             continue
 
+        # tree -L N: N-qavatdagi papka ko'rinadi, lekin ichiga kirilmaydi
+        if max_depth != -1 and depth >= max_depth:
+            continue
+
         extension = "    " if last else "│   "
-        sub_lines, sub_dirs, sub_files = _walk(entry, skip_patterns, prefix + extension)
+        sub_lines, sub_dirs, sub_files = _walk(
+            entry, skip_patterns, max_depth, depth + 1, prefix + extension
+        )
         lines.extend(sub_lines)
         dirs += sub_dirs
         files += sub_files
@@ -44,7 +52,7 @@ def _walk(
     return lines, dirs, files
 
 
-def _render_tree(root: Path, skip_patterns: list[str]) -> str:
+def _render_tree(root: Path, skip_patterns: list[str], max_depth: int) -> str:
     if not root.exists():
         return f'<file_tree path="{root}" error="not found" />'
 
@@ -52,7 +60,7 @@ def _render_tree(root: Path, skip_patterns: list[str]) -> str:
         body = root.name
         stats = "0 directories, 1 files"
     else:
-        lines, dirs, files = _walk(root, skip_patterns)
+        lines, dirs, files = _walk(root, skip_patterns, max_depth)
         body = "\n".join(lines)
         stats = f"{dirs} directories, {files} files"
 
@@ -62,8 +70,12 @@ def _render_tree(root: Path, skip_patterns: list[str]) -> str:
 
 # Ro'yxatdagi har bir path uchun alohida tree bloki.
 # Boshqa pathning ichida joylashgan pathlar o'tkazib yuboriladi.
-def get_file_trees(roots: list[Path], skip_patterns: list[str]) -> str:
+def get_file_trees(
+    roots: list[Path], skip_patterns: list[str], max_depth: int = -1
+) -> str:
     roots = dedupe_nested(roots)
     if not roots:
         return "<file_tree></file_tree>"
-    return "\n\n".join(_render_tree(root, skip_patterns) for root in roots)
+    return "\n\n".join(
+        _render_tree(root, skip_patterns, max_depth) for root in roots
+    )

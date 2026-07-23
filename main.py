@@ -16,6 +16,8 @@ from app.sources.file_tree import get_file_trees
 from app.sources.paths import get_paths_context
 
 EXAMPLE_CONFIG = """\
+# -1 = all file/folder tree, any positive number = max level/layer (as tree -L N)
+file_tree_level: -1
 file_tree: [
   /Users/yourname/PycharmProjects/my-project,
 ]
@@ -109,7 +111,9 @@ async def get_context():
     parts: list[str] = []
 
     if config.file_tree:
-        parts.append(get_file_trees(config.file_tree, config.skip_files))
+        parts.append(
+            get_file_trees(config.file_tree, config.skip_files, config.file_tree_level)
+        )
 
     if config.paths:
         parts.append(get_paths_context(config.paths, config.skip_files))
@@ -133,7 +137,7 @@ async def get_files():
     config = load_config(get_config_path())
     if not config.file_tree:
         return "file_tree not configured"
-    return get_file_trees(config.file_tree, config.skip_files)
+    return get_file_trees(config.file_tree, config.skip_files, config.file_tree_level)
 
 
 @app.get("/context/paths", response_class=PlainTextResponse)

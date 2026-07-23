@@ -7,6 +7,7 @@ from pydantic import BaseModel, field_validator
 
 class AppConfig(BaseModel):
     file_tree: list[Path] = []
+    file_tree_level: int = -1
     skip_files: list[str] = []
     paths: list[Path] = []
 
@@ -16,6 +17,16 @@ class AppConfig(BaseModel):
         if not v:
             return []
         return [Path(p).expanduser().resolve() for p in v]
+
+    @field_validator("file_tree_level", mode="before")
+    @classmethod
+    def validate_level(cls, v):
+        if v is None:
+            return -1
+        level = int(v)
+        if level == 0 or level < -1:
+            raise ValueError("file_tree_level must be -1 (unlimited) or a positive int")
+        return level
 
 
 def load_config(path: str | Path = "context.yaml") -> AppConfig:
