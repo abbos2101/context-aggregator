@@ -16,7 +16,8 @@ from app.sources.file_tree import get_file_trees
 from app.sources.paths import get_paths_context
 
 EXAMPLE_CONFIG = """\
-# -1 = all file/folder tree, any positive number = max level/layer (as tree -L N)
+# -1 = full tree; a path nested inside another path is skipped (no duplicate trees)
+# N > 0 = every path gets its own N-level tree (as tree -L N); nested paths are kept
 file_tree_level: -1
 file_tree: [
   /Users/yourname/PycharmProjects/my-project,

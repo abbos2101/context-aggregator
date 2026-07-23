@@ -14,11 +14,10 @@ def should_skip(path: Path, skip_patterns: list[str]) -> bool:
     return False
 
 
-# Takror va ichma-ich (nested) pathlarni olib tashlaydi.
-# Agar path ro'yxatdagi boshqa pathning ichida bo'lsa — tashlab yuboriladi.
-def dedupe_nested(paths: list[Path]) -> list[Path]:
-    unique: list[Path] = []
+# Faqat aynan takrorlanadigan pathlarni olib tashlaydi, tartib saqlanadi.
+def dedupe(paths: list[Path]) -> list[Path]:
     seen: set[Path] = set()
+    unique: list[Path] = []
 
     for path in paths:
         if path in seen:
@@ -26,4 +25,12 @@ def dedupe_nested(paths: list[Path]) -> list[Path]:
         seen.add(path)
         unique.append(path)
 
-    return [p for p in unique if not any(parent in seen for parent in p.parents)]
+    return unique
+
+
+# Ichma-ich (nested) pathlarni olib tashlaydi: agar path ro'yxatdagi
+# boshqa pathning ichida bo'lsa — tashlab yuboriladi.
+def drop_nested(paths: list[Path]) -> list[Path]:
+    unique = dedupe(paths)
+    roots = set(unique)
+    return [p for p in unique if not any(parent in roots for parent in p.parents)]

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from app.common.utils import dedupe_nested, should_skip
+from app.common.utils import dedupe, drop_nested, should_skip
 
 
 # Bitta o'tishda ham tree satrlarini, ham (dirs, files) statistikani qaytaradi —
@@ -69,11 +69,14 @@ def _render_tree(root: Path, skip_patterns: list[str], max_depth: int) -> str:
 
 
 # Ro'yxatdagi har bir path uchun alohida tree bloki.
-# Boshqa pathning ichida joylashgan pathlar o'tkazib yuboriladi.
+# max_depth == -1: to'liq tree — nested path ota-tree ichida allaqachon
+#   ko'rinadi, shuning uchun takror tree yaratmaslik uchun tashlab yuboriladi.
+# max_depth > 0: har bir path uchun mustaqil N qavatli tree (tree -L N kabi) —
+#   nested pathlar ham saqlanadi, faqat aynan takrorlari olib tashlanadi.
 def get_file_trees(
     roots: list[Path], skip_patterns: list[str], max_depth: int = -1
 ) -> str:
-    roots = dedupe_nested(roots)
+    roots = drop_nested(roots) if max_depth == -1 else dedupe(roots)
     if not roots:
         return "<file_tree></file_tree>"
     return "\n\n".join(
